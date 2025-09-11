@@ -37,8 +37,9 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private lateinit var rubyCoinTexture: Texture
     private lateinit var sapphireCoinTexture: Texture
 
-    private lateinit var coinTexture: Texture
-    private lateinit var coinAnimation: Animation<TextureRegion>
+    private lateinit var goldCoinAnimation: Animation<TextureRegion>
+    private lateinit var rubyCoinAnimation: Animation<TextureRegion>
+    private lateinit var sapphireCoinAnimation: Animation<TextureRegion>
 
     private lateinit var platformTexture: Texture
 
@@ -85,20 +86,37 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         heartTexture = Texture("heart.png")
         platformTexture = Texture("platform.png")
 
+        sapphireCoinTexture = Texture("ruby_coin.png")
 
-
-        goldCoinTexture = Texture("skeleton.png")
-        rubyCoinTexture = Texture("skeleton.png")
-        sapphireCoinTexture = Texture("skeleton.png")
-
-        coinTexture = Texture("gold_coin.png") // Your spritesheet
-        val frameWidth = coinTexture.width / 4
-        val frameHeight = coinTexture.height
+        // Gold coin
+        goldCoinTexture = Texture("gold_coin.png")
+        val frameWidth = goldCoinTexture.width / 4
+        val frameHeight = goldCoinTexture.height
         val coinFrames = Array(4) { i ->
-            TextureRegion(coinTexture, i * frameWidth, 0, frameWidth, frameHeight)
+            TextureRegion(goldCoinTexture, i * frameWidth, 0, frameWidth, frameHeight)
         }
-        coinAnimation = Animation(0.2f, *coinFrames)
-        coinAnimation.playMode = Animation.PlayMode.LOOP
+        goldCoinAnimation = Animation(0.2f, *coinFrames)
+        goldCoinAnimation.playMode = Animation.PlayMode.LOOP
+
+        // Ruby coin
+        rubyCoinTexture = Texture("ruby_coin.png")
+        val rubyFrameWidth = rubyCoinTexture.width / 4
+        val rubyFrameHeight = rubyCoinTexture.height
+        val rubyCoinFrames = Array(4) { i ->
+            TextureRegion(rubyCoinTexture, i * rubyFrameWidth, 0, rubyFrameWidth, rubyFrameHeight)
+        }
+        rubyCoinAnimation = Animation<TextureRegion>(0.2f, *rubyCoinFrames)
+        rubyCoinAnimation.playMode = Animation.PlayMode.LOOP
+
+        // Sapphire coin
+        sapphireCoinTexture = Texture("sapphire_coin.png")
+        val sapphireFrameWidth = sapphireCoinTexture.width / 4
+        val sapphireFrameHeight = sapphireCoinTexture.height
+        val sapphireCoinFrames = Array(4) { i ->
+            TextureRegion(sapphireCoinTexture, i * sapphireFrameWidth, 0, sapphireFrameWidth, sapphireFrameHeight)
+        }
+        sapphireCoinAnimation = Animation<TextureRegion>(0.2f, *sapphireCoinFrames)
+        sapphireCoinAnimation.playMode = Animation.PlayMode.LOOP
 
         font = BitmapFont()
         camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
@@ -261,9 +279,9 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         while (coinIter.hasNext()) {
             val coin = coinIter.next()
             val texture = when (coin.type) {
-                CoinType.GOLD -> coinTexture
-                CoinType.RUBY -> coinTexture
-                CoinType.SAPPHIRE -> coinTexture
+                CoinType.GOLD -> goldCoinTexture
+                CoinType.RUBY -> rubyCoinTexture
+                CoinType.SAPPHIRE -> goldCoinTexture
             }
             val coinBounds = Rectangle(coin.x, coin.y, texture.width.toFloat(), texture.height.toFloat())
             if (playerBounds.overlaps(coinBounds)) {
@@ -348,12 +366,11 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
 
         // --- Draw coins ---
         for (coin in coins) {
-            val tex = when (coin.type) {
-                CoinType.GOLD -> goldCoinTexture
-                CoinType.RUBY -> rubyCoinTexture
-                CoinType.SAPPHIRE -> sapphireCoinTexture
+            val frame = when (coin.type) {
+                CoinType.GOLD -> goldCoinAnimation.getKeyFrame(coin.stateTime, true)
+                CoinType.RUBY -> rubyCoinAnimation.getKeyFrame(coin.stateTime, true)
+                CoinType.SAPPHIRE -> sapphireCoinAnimation.getKeyFrame(coin.stateTime, true)
             }
-            val frame = coinAnimation.getKeyFrame(coin.stateTime, true)
             batch.draw(frame, coin.x, coin.y)
         }
 
@@ -384,6 +401,19 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         batch.end()
     }
 
+    fun getRandomCoinType(): CoinType {
+        val rand = Math.random() * 100
+        var cumulative = 0.0
+
+        for (type in CoinType.entries) {
+            cumulative += type.spawnChance
+            if (rand < cumulative) {
+                return type
+            }
+        }
+        return CoinType.GOLD // fallback default
+    }
+
     private fun spawnCoin() {
         val spawnX = camera.position.x + camera.viewportWidth / 2f + 150f + Random.nextFloat() * 200f
         // Define your min/max coin spawn heights:
@@ -392,7 +422,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         val spawnY = minY + Random.nextFloat() * (maxY - minY)
 
         // Pick coin type randomly if you want:
-        val type = CoinType.entries.toTypedArray().random()
+        val type = getRandomCoinType()
         coins.add(Coin(spawnX, spawnY, type))
     }
 
@@ -506,7 +536,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         chunksSpawned++
     }
 
-
     // Platform collision logic:
     private fun handlePlatformCollision(delta: Float) {
         val footHeight = 10f
@@ -517,17 +546,20 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         for (platform in platforms) {
             if (platform.y <= groundY) continue // skip ground platform, handled below
 
-            val platformRect = Rectangle(platform.x, platform.y, platform.width, platform.height)
             val horizontallyAligned = footRect.x + footRect.width > platform.x &&
                 footRect.x < platform.x + platform.width
 
-            val fallingOrStill = player.verticalVelocity <= 0f
-
+            // The platform's top edge y position
             val platformTop = platform.y + platform.height
-            val justAbovePlatform = player.y >= platformTop &&
-                player.y + player.verticalVelocity * delta <= platformTop + 2f
 
-            if (horizontallyAligned && fallingOrStill && justAbovePlatform) {
+            // Player's feet vertical position (assumed at player.y)
+            val playerFeetY = player.y
+
+            // Check if player's feet are within a small range of the platform top (e.g., +/- 2 pixels)
+            val feetCloseToPlatform = playerFeetY >= platformTop - footHeight && playerFeetY <= platformTop + 2f
+
+            // Allow platform collision only if horizontally aligned and feet close vertically
+            if (horizontallyAligned && player.verticalVelocity <= 0f && feetCloseToPlatform) {
                 standingOnPlatform = platform
                 break
             }
@@ -535,17 +567,17 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
 
         if (standingOnPlatform != null) {
             if (Gdx.input.isKeyPressed(Input.Keys.S) && player.y > groundY + 5f) {
-                // Drop-through: do not snap position, player falls naturally
+                // Drop-through behavior
                 isPlayerStandingOnPlatform = false
             } else {
-                // Player stands on platform: snap every frame to avoid falling through
+                // Snap player to platform top and reset jump and velocity
                 player.y = standingOnPlatform.y + standingOnPlatform.height
                 player.verticalVelocity = 0f
                 player.jumpsDone = 0
                 isPlayerStandingOnPlatform = true
             }
         } else {
-            // No platform beneath; handle ground collision
+            // Ground collision check
             if (player.y < groundY) {
                 player.y = groundY
                 player.verticalVelocity = 0f
@@ -577,7 +609,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         rubyCoinTexture.dispose()
         sapphireCoinTexture.dispose()
         platformTexture.dispose()
-        coinTexture.dispose()
 
         font.dispose()
     }
