@@ -1,4 +1,4 @@
-package com.example.platformer
+package platformer
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
@@ -140,7 +140,7 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
                     println("Load Game clicked - not implemented")
                 }
                 shopButtonRect.contains(mouseX, mouseY) -> {
-                    println("Shop clicked - not implemented")
+                    game.setScreen(ShopScreen(game))
                 }
                 closeGameButtonRect.contains(mouseX, mouseY) -> {
                     Gdx.app.exit()

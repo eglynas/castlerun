@@ -1,4 +1,4 @@
-package com.example.platformer
+package platformer
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx

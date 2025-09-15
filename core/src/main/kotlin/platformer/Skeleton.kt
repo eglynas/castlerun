@@ -1,4 +1,4 @@
-package com.example.platformer
+package platformer
 
 enum class SkeletonType(val value: Int) {
     STANDARD(0),

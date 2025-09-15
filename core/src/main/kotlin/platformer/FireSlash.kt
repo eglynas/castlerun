@@ -1,4 +1,4 @@
-package com.example.platformer
+package platformer
 
 data class FireSlash(
     var x: Float,

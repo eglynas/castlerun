@@ -1,4 +1,4 @@
-package com.example.platformer
+package platformer
 
 enum class CoinType(val value: Int, val spawnChance: Double) {
     GOLD(1, 80.0),

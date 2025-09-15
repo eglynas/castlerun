@@ -1,4 +1,4 @@
-package com.example.platformer
+package platformer
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -59,7 +59,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
 
     // Chunks variables
     private var nextChunkSpawnX = 0f // Tracks where to place the next chunk
-    private val chunksToSkip = 2            // Number of platform chunks to skip at start
     private var chunksSpawned = 0           // Tracks how many chunks have been (attempted) spawned
     private var platformSpawnTimer = 0f     // Timer for spawn delay
     private val platformSpawnDelay = 0f   // Minimum seconds between platform spawns
@@ -141,15 +140,12 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             drawPauseScreen()
             handlePauseInput()
         } else if (gameOverFlag) {
-            drawGameOverScreen()
-            handleGameOverInput()
+            game.setScreen(GameOverScreen(game))
         }
     }
 
     private fun updateGame(delta: Float) {
 
-        val cameraRightEdge = camera.position.x + camera.viewportWidth / 2f
-        val spawnFarRight = cameraRightEdge + 300f  // 300 pixels beyond the visible right edge
         // Player horizontal movement
         if (Gdx.input.isKeyPressed(Input.Keys.A)) player.x -= playerSpeed * delta
         if (Gdx.input.isKeyPressed(Input.Keys.D)) player.x += playerSpeed * delta
@@ -176,8 +172,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             player.isAttacking = true
             player.attackTimer = player.attackDuration
         }
-
-        val playerRightEdge = player.x + player.width
 
         platformSpawnTimer += delta
         if (platformSpawnTimer >= platformSpawnDelay) {
@@ -469,29 +463,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         gameOverFlag = true
     }
 
-    private fun drawGameOverScreen() {
-        batch.begin()
-        font.color = Color.RED
-        val message = "GAME OVER\nPress R to Restart\nPress Q to Quit to the Main Menu"
-        val layout = GlyphLayout(font, message)
-        font.draw(
-            batch,
-            message,
-            camera.position.x - layout.width / 2,
-            camera.position.y + layout.height / 2
-        )
-        batch.end()
-    }
-
-    private fun handleGameOverInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            resetGame()
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
-            game.setScreen(MainMenuScreen(game))
-            dispose()
-        }
-    }
-
     private fun drawPauseScreen() {
         batch.begin()
         font.color = Color.WHITE
@@ -588,8 +559,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             }
         }
     }
-
-
 
     override fun pause() {}
     override fun resume() {}

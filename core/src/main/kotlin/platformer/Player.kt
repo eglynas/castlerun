@@ -1,12 +1,12 @@
-package com.example.platformer
+package platformer
 
 import com.badlogic.gdx.math.Rectangle
 
 class Player(
     var x: Float = 100f,
     var y: Float = 100f,
-    var width: Float = 137f,
-    var height: Float = 151f,
+    var width: Float = 135f,
+    var height: Float = 150f,
     var health: Int = 3,
     var maxhealth: Int = 5
 ) {
