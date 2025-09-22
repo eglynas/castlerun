@@ -10,18 +10,19 @@ class Player(
     var health: Int = 3,
     var maxhealth: Int = 5
 ) {
+    var maxJumps: Int = 2
+    var attackCooldown: Float = 1f
+    var moveSpeed: Float = 200f
+
     var verticalVelocity: Float = 0f
     var isInvincible: Boolean = false
     var invincibilityTimer: Float = 0f
     var flashTimer: Float = 0f
     var isVisible: Boolean = true
 
-    // Attack variables
     var isAttacking: Boolean = false
     var attackTimer: Float = 0f
-    val attackDuration: Float = 0.18f
 
-    // Constants related to player movement and physics
     val jumpSpeed = 900f
     val gravity = -2000f
     val fastFallGravity = -8000f
@@ -30,33 +31,20 @@ class Player(
     val flashInterval = 0.1f
     var jumpsDone = 0
 
-    /**
-     * Rectangle representing player bounds for collision detection.
-     */
     val bounds: Rectangle
         get() = Rectangle(x, y, width, height)
 
-    /**
-     * Update player physics like vertical velocity and position.
-     * This does NOT handle input directly; input handling goes in the GameplayScreen.
-     */
-    fun update(delta: Float, isJumpPressed: Boolean, isDownPressed: Boolean) {
-        // Detect if player is on ground (with a small epsilon)
+    fun update(delta: Float, isJumpPressed: Boolean, isDownPressed: Boolean, moveDirection: Int) {
+        println("[Player] attackTimer=$attackTimer, isAttacking=$isAttacking")
         val onGround = y <= groundY + 0.1f
+        if (onGround) jumpsDone = 0
 
-        // Reset jumps counter once on the ground
-        if (onGround) {
-            jumpsDone = 0
-        }
-
-        // Jump logic (allow up to 2 jumps)
-        if (isJumpPressed && jumpsDone < 2) {
+        if (isJumpPressed && jumpsDone < maxJumps) {
             verticalVelocity = jumpSpeed
             jumpsDone++
         }
 
         val effectiveGravity = if (isDownPressed) fastFallGravity else gravity
-
         verticalVelocity += effectiveGravity * delta
         y += verticalVelocity * delta
 
@@ -64,6 +52,8 @@ class Player(
             y = groundY
             verticalVelocity = 0f
         }
+
+        x += moveDirection * moveSpeed * delta
 
         if (isInvincible) {
             invincibilityTimer += delta
@@ -79,11 +69,25 @@ class Player(
                 isVisible = true
             }
         }
+
+        if (attackTimer > 0f) {
+            attackTimer -= delta
+            if (attackTimer <= 0f) {
+                attackTimer = 0f
+                isAttacking = false
+            }
+            println("[Player] attackTimer=$attackTimer, isAttacking=$isAttacking")
+        }
     }
 
-    /**
-     * Called when player takes damage.
-     */
+    fun applyUpgrades(maxJumps: Int, attackCooldown: Float, moveSpeed: Float, maxHealth: Int) {
+        this.maxJumps = maxJumps
+        this.attackCooldown = attackCooldown
+        this.moveSpeed = moveSpeed
+        this.maxhealth = maxHealth
+        if (health > maxHealth) health = maxHealth
+    }
+
     fun onHit() {
         if (!isInvincible) {
             health -= 1
@@ -94,14 +98,8 @@ class Player(
         }
     }
 
-    /**
-     * Check if the player is alive.
-     */
     fun isAlive(): Boolean = health > 0
 
-    /**
-     * Reset player state to initial values.
-     */
     fun reset(startX: Float = 100f, startY: Float = groundY, startHealth: Int = 3) {
         x = startX
         y = startY
@@ -111,5 +109,9 @@ class Player(
         invincibilityTimer = 0f
         flashTimer = 0f
         isVisible = true
+        jumpsDone = 0
+        isAttacking = false
+        attackTimer = 0f
+        println("[Reset] Player state reset: attackTimer=$attackTimer, isAttacking=$isAttacking")
     }
 }

@@ -1,11 +1,10 @@
 package platformer
 
-enum class CoinType(val value: Int, val spawnChance: Double) {
-    GOLD(1, 80.0),
-    RUBY(5, 15.0),
-    SAPPHIRE(10, 5.0)
+enum class CoinType(val value: Int) {
+    GOLD(1),
+    RUBY(5),
+    SAPPHIRE(10)
 }
-
 
 data class Coin(
     var x: Float,

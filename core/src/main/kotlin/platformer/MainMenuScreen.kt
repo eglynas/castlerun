@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -16,7 +15,6 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
     private val batch = SpriteBatch()
     private val shapeRenderer = ShapeRenderer()
     private val font = BitmapFont() // Or use a custom font if you prefer
-    private val mainMenuTexture = Texture("main_menu.png")
 
     private val menuAssetWidth = 1536f
     private val menuAssetHeight = 1024f
@@ -33,6 +31,7 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
     private lateinit var closeGameButtonRect: Rectangle
 
     override fun show() {
+        Assets.loadAll()
         resize(Gdx.graphics.width, Gdx.graphics.height)
     }
 
@@ -41,15 +40,13 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         batch.begin()
-        batch.draw(mainMenuTexture, menuX, menuY, menuDrawWidth, menuDrawHeight)
+        batch.draw(Assets.mainMenu, menuX, menuY, menuDrawWidth, menuDrawHeight)
         // Draw coin count at desired screen location (for example, top left)
         font.color = Color.GOLD // Optional: change color
         font.data.setScale(2f) // Optional: make the text larger
         font.draw(batch, "Coin Count: ${game.collectedCoins}", menuX + 40f, menuY + menuDrawHeight - 40f)
         font.draw(batch, "XP Count: ${game.xp}", menuX + 40f, menuY + menuDrawHeight - 80f)
         batch.end()
-
-        drawDebugButtonRects()
 
         handleInput()
     }
@@ -143,6 +140,7 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
                     game.setScreen(ShopScreen(game))
                 }
                 closeGameButtonRect.contains(mouseX, mouseY) -> {
+                    Assets.disposeAll()
                     Gdx.app.exit()
                 }
             }
@@ -182,14 +180,12 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
             shapeRenderer.end()
         }
     }
-
     override fun pause() {}
     override fun resume() {}
     override fun hide() {}
 
     override fun dispose() {
         batch.dispose()
-        mainMenuTexture.dispose()
         shapeRenderer.dispose()
         font.dispose()
     }

@@ -4,8 +4,9 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 
 class PlatformerGame : Game() {
-    var collectedCoins: Int = 0
+    var collectedCoins: Int = 1000
         private set
+
     var xp: Int = 0
         private set
 
@@ -13,10 +14,19 @@ class PlatformerGame : Game() {
         collectedCoins += amount
         saveGlobals()
     }
+
+    //fun getCollectedCoins(): Int = collectedCoins
+
+    fun spendCoins(cost: Int) {
+        collectedCoins -= cost
+    }
+
     fun addXP(amount: Int = 1) {
         xp += amount
         saveGlobals()
     }
+
+    fun getCollectedXP(): Int = xp
 
     fun loadGlobals() {
         val prefs = Gdx.app.getPreferences("platformer_prefs")
