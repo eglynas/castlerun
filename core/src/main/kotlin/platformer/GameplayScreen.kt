@@ -27,14 +27,13 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private val coins = mutableListOf<Coin>()
     private val hearts = mutableListOf<Heart>()
     private val platforms = mutableListOf<Platform>()
+    private val activePowerUps = mutableListOf<PowerUpEffect>()
+    private val powerUpPickups = mutableListOf<PowerUpPickup>()
 
-    private var nextChunkSpawnX = 0f
     private var chunksSpawned = 0
     private var platformSpawnTimer = 0f
     private val platformSpawnDelay = 0f
 
-    private var nextSkeletonSpawnX = 400f
-    private var nextHeartSpawnX = 1500f
     private var worldLeftEdge = 0f
 
     private var gameOverFlag = false
@@ -46,6 +45,14 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private var rubySpawnRate = 15f
     private var sapphireSpawnRate = 5f
     private var expGainMultiplier = 1f
+
+    private var nextHeartSpawnX = 1500f
+    private var nextSkeletonSpawnX = 400f
+    private var nextPowerUpSpawn = 3000f
+    private var nextChunkSpawnX = 0f
+
+    var skeletonSpawnChance = 50.0
+    var powerUpSpawnChance = 5.0
 
     val moveDirection: Int
         get() = when {
@@ -92,16 +99,16 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private fun updateGame(delta: Float) {
         if (Gdx.input.isKeyPressed(Input.Keys.A)) player.x -= player.moveSpeed * delta
         if (Gdx.input.isKeyPressed(Input.Keys.D)) player.x += player.moveSpeed * delta
-
-        platforms.forEach { it.x -= cutoffSpeed * delta }
-        platforms.removeAll { it.x + it.width < worldLeftEdge - 300f }
-
         val isJumpPressed = Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)
         val isDownPressed = Gdx.input.isKeyPressed(Input.Keys.S)
         player.update(delta, isJumpPressed, isDownPressed, moveDirection)
         handleShooting()
         handlePlatformCollision()
 
+
+        //PLATFORMS
+        platforms.forEach { it.x -= cutoffSpeed * delta }
+        platforms.removeAll { it.x + it.width < worldLeftEdge - 300f }
         platformSpawnTimer += delta
         if (platformSpawnTimer >= platformSpawnDelay) {
             if (player.x + player.width > nextChunkSpawnX) {
@@ -112,31 +119,19 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
 
         worldLeftEdge += cutoffSpeed * delta
 
-        if (player.x > nextSkeletonSpawnX) {
-            spawnSkeleton()
-            nextSkeletonSpawnX += Random.nextFloat() * 500f + 300f
-        }
-        skeletons.removeAll { it.x < worldLeftEdge - 500f }
-
-        coins.forEach { it.stateTime += delta }
-        updateCoinSpawning(delta)
-        coins.removeAll { it.x < worldLeftEdge - 500f }
-
-        if (player.x > nextHeartSpawnX) {
-            spawnHeart()
-            nextHeartSpawnX += Random.nextFloat() * 1200f + 800f
-        }
-        hearts.removeAll { it.x < worldLeftEdge - 500f }
-
         val halfViewportWidth = camera.viewportWidth / 2f
         val minCameraCenterX = worldLeftEdge + halfViewportWidth
         camera.position.x = (player.x + player.width / 2f).coerceAtLeast(minCameraCenterX)
         camera.position.y = camera.viewportHeight / 2f
         camera.update()
-
-        skeletons.forEach { it.updateBlink(delta) }
-
         val playerBounds = player.bounds
+
+        //SKELETONS
+        if (player.x > nextSkeletonSpawnX) {
+            spawnSkeleton()
+        }
+        skeletons.removeAll { it.x < worldLeftEdge - 500f }
+        skeletons.forEach { it.updateBlink(delta) }
         val skeletonIterator = skeletons.iterator()
         while (skeletonIterator.hasNext()) {
             val skeleton = skeletonIterator.next()
@@ -150,6 +145,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             if (playerBounds.overlaps(skeletonBounds)) onPlayerHit()
         }
 
+        //FIRE SLASHES
         val slashIterator = fireSlashes.iterator()
         while (slashIterator.hasNext()) {
             val slash = slashIterator.next()
@@ -178,6 +174,10 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             if (slash.x > camera.position.x + camera.viewportWidth / 2f + 100f) slashIterator.remove()
         }
 
+        //COINS
+        coins.forEach { it.stateTime += delta }
+        updateCoinSpawning(delta)
+        coins.removeAll { it.x < worldLeftEdge - 500f }
         val coinIterator = coins.iterator()
         while (coinIterator.hasNext()) {
             val coin = coinIterator.next()
@@ -190,11 +190,18 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             val coinBounds = Rectangle(coin.x, coin.y, frame.regionWidth.toFloat(), frame.regionHeight.toFloat())
             if (playerBounds.overlaps(coinBounds)) {
                 coinIterator.remove()
-                game.addCoins()
+                val coinValue = coin.value  // Get the coin value from the enum
+                game.addCoins(coinValue)
                 game.saveGlobals()
             }
         }
 
+        //HEARTS
+        if (player.x > nextHeartSpawnX) {
+            spawnHeart()
+            nextHeartSpawnX += Random.nextFloat() * 1200f + 800f
+        }
+        hearts.removeAll { it.x < worldLeftEdge - 500f }
         val heartIterator = hearts.iterator()
         while (heartIterator.hasNext()) {
             val heart = heartIterator.next()
@@ -205,6 +212,31 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             }
         }
 
+        //POWER UPS
+        if (player.x > nextPowerUpSpawn) {
+            spawnPowerUp()
+            nextPowerUpSpawn += Random.nextFloat() * 1200f + 800f
+        }
+        powerUpPickups.forEach { it.update(delta) }
+        activePowerUps.forEach { it.update(delta) }
+        activePowerUps.removeAll { !it.active }
+        val iterator = powerUpPickups.iterator()
+        while (iterator.hasNext()) {
+            val pickup = iterator.next()
+            val width = when (pickup.type) {
+                PowerUpType.COIN_SPAWN_RATE_BOOST -> Assets.coin_bonus.width.toFloat()
+                // Add other power-up types here
+            }
+            val height = when (pickup.type) {
+                PowerUpType.COIN_SPAWN_RATE_BOOST -> Assets.coin_bonus.height.toFloat()
+                // Add other power-up types here
+            }
+            val pickupBounds = Rectangle(pickup.x, pickup.y, width, height)
+            if (playerBounds.overlaps(pickupBounds)) {
+                iterator.remove()   // safely remove from the list while iterating
+                activatePowerUp(pickup.type)
+            }
+        }
         player.x = player.x.coerceAtLeast(worldLeftEdge)
     }
 
@@ -258,12 +290,20 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             batch.draw(Assets.platform, platform.x, platform.y)
         }
 
-        fireSlashes.forEach { slash ->
+        for (slash in fireSlashes) {
             batch.draw(Assets.fireSlash, slash.x, slash.y)
         }
 
         for (heart in hearts) {
             batch.draw(Assets.heart, heart.x, heart.y)
+        }
+
+        powerUpPickups.forEach { pickup ->
+            val texture = when (pickup.type) {
+                PowerUpType.COIN_SPAWN_RATE_BOOST -> Assets.coin_bonus
+                // Add other power-up types here if needed
+            }
+            batch.draw(texture, pickup.x, pickup.y)
         }
 
         // Draw player's health icons at top left
@@ -303,14 +343,27 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         chunksSpawned++
     }
     private fun spawnSkeleton() {
-        val spawnX = camera.position.x + camera.viewportWidth / 2f + 100f + randomFloat(0f, 200f)
-        val type = SkeletonType.entries.random()
-        val health = when (type) {
-            SkeletonType.STANDARD -> 3
-            SkeletonType.LIGHT -> 2
-            SkeletonType.GRAY -> 4
+        if (Random.nextDouble() * 100 <= skeletonSpawnChance) {
+            val spawnX = camera.position.x + camera.viewportWidth / 2f + 100f + randomFloat(0f, 200f)
+            val type = SkeletonType.entries.random()
+            val health = when (type) {
+                SkeletonType.STANDARD -> 3
+                SkeletonType.LIGHT -> 2
+                SkeletonType.GRAY -> 4
+            }
+            skeletons.add(
+                Skeleton(
+                    x = spawnX,
+                    y = groundY,
+                    vx = -60f,
+                    isLight = type == SkeletonType.LIGHT,
+                    type = type,
+                    health = health
+                )
+            )
         }
-        skeletons.add(Skeleton(x = spawnX, y = groundY, vx = -60f, isLight = type == SkeletonType.LIGHT, type = type, health = health))
+        // Update the next spawn X regardless of whether a skeleton was spawned
+        nextSkeletonSpawnX += (Random.nextDouble() * 500.0 + 300.0).toFloat()
     }
     fun spawnCoin(rubyRate: Float, sapphireRate: Float) {
         val spawnX = camera.position.x + camera.viewportWidth / 2f + 150f + Random.nextFloat() * 200f
@@ -326,6 +379,20 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         val spawnY = minY + Random.nextFloat() * (maxY - minY)
         hearts.add(Heart(spawnX, spawnY))
     }
+    private fun spawnPowerUp() {
+        if (Random.nextDouble() * 100 <= powerUpSpawnChance) {
+            val spawnX = camera.position.x + camera.viewportWidth / 2f + 150f + randomFloat(0f, 300f)
+            val minY = groundY + 40f
+            val maxY = groundY + 320f
+            val spawnY = minY + Random.nextFloat() * (maxY - minY)
+
+            val pickup = PowerUpPickup(spawnX, spawnY, PowerUpType.COIN_SPAWN_RATE_BOOST)
+            pickup.vx = -50f  // Flying speed to the left
+            powerUpPickups.add(pickup)
+        }
+    }
+
+
     //HANDLE
     private fun handlePlatformCollision() {
         val footHeight = 10f
@@ -394,6 +461,23 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         }
     }
     //MISC
+    private fun activatePowerUp(type: PowerUpType) {
+        when (type) {
+            PowerUpType.COIN_SPAWN_RATE_BOOST -> {
+                val originalInterval = coinSpawnInterval
+                val effect = PowerUpEffect(
+                    type = type,
+                    durationSeconds = 10f,
+                    onActivate = { coinSpawnInterval = 0.1f },
+                    onDeactivate = { coinSpawnInterval = originalInterval }
+                )
+                effect.onActivate()
+                activePowerUps.add(effect)
+            }
+            // Handle other power-up types similarly
+        }
+    }
+
     private fun applyUpgradesToGame() {
         val upgrades = upgradeManager.getAllUpgrades()
         player.applyUpgrades(

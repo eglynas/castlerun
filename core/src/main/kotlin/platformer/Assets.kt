@@ -24,6 +24,7 @@ object Assets {
     private const val PLATFORM = "platform.png"
     private const val MAIN_MENU = "main_menu.png"
     private const val SHOP = "shop.png"
+    private const val COIN_BONUS = "coin_bonus.png"
 
     var bg: Texture = Texture(BG)
     lateinit var player: Texture
@@ -39,18 +40,20 @@ object Assets {
     lateinit var platform: Texture
     lateinit var mainMenu: Texture
     lateinit var shop: Texture
+    lateinit var coin_bonus: Texture
+
     lateinit var font: BitmapFont
+
 
     lateinit var goldCoinAnimation: Animation<TextureRegion>
     lateinit var rubyCoinAnimation: Animation<TextureRegion>
     lateinit var sapphireCoinAnimation: Animation<TextureRegion>
 
     fun loadAll() {
-        println("Loading assets...")
         val textures = listOf(
             PLAYER, PLAYER_ATTACK, SKELETON, SKELETON_LIGHT, SKELETON_GRAY,
             FIRE_SLASH, HEART, GOLD_COIN, RUBY_COIN, SAPPHIRE_COIN, PLATFORM,
-            MAIN_MENU, SHOP
+            MAIN_MENU, SHOP, COIN_BONUS
         )
         textures.forEach { manager.load(it, Texture::class.java) }
         manager.finishLoading()
@@ -69,6 +72,7 @@ object Assets {
         platform = manager.get(PLATFORM, Texture::class.java)
         mainMenu = manager.get(MAIN_MENU, Texture::class.java)
         shop = manager.get(SHOP, Texture::class.java)
+        coin_bonus = manager.get(COIN_BONUS, Texture::class.java)
         font = BitmapFont()
 
         // Create coin animations

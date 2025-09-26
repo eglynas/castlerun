@@ -14,9 +14,11 @@ class UpgradeManager {
                 name = "Jump Count",
                 level = 1,
                 maxLevel = 3,
-                cost = 100,
-                baseCost = 100,
+                currentCost = 1000,
+                baseCost = 1000,
+                costScale = 5f,
                 baseValue = 1f,
+                valueScale = 1f,
                 scalingType = ScalingType.ADDITIVE,
                 increment = 1f
             )
@@ -25,36 +27,41 @@ class UpgradeManager {
             Upgrade(
                 name = "Attack Speed",
                 level = 1,
-                maxLevel = 10,
-                cost = 150,
-                baseCost = 150,
-                baseValue = 0.25f,
-                scalingType = ScalingType.MULTIPLICATIVE,
-                valueScale = 0.9f,
-                increment = 0f
+                maxLevel = 11,
+                currentCost = 150,
+                baseCost = 300,
+                costScale = 1.5f,
+                baseValue = 0.4f,
+                valueScale = 1.5f,
+                scalingType = ScalingType.ADDITIVE,
+                increment = -0.025f
             )
         )
         upgrades.add(
             Upgrade(
                 name = "Moving Speed",
                 level = 1,
-                maxLevel = 10,
-                cost = 150,
-                baseCost = 150,
+                maxLevel = 5,
+                currentCost = 200,
+                baseCost = 200,
+                costScale = 1.5f,
                 baseValue = 300f,
-                scalingType = ScalingType.MULTIPLICATIVE,
-                valueScale = 1.1f,
-                increment = 0f
+                valueScale = 1.5f,
+                scalingType = ScalingType.ADDITIVE,
+                increment = 50f
             )
         )
         upgrades.add(
             Upgrade(
                 name = "Max Health",
                 level = 1,
-                maxLevel = 10,
-                cost = 200,
+                maxLevel = 8,
+                currentCost = 200,
                 baseCost = 200,
+                costScale = 1.5f,
+                currentValue = 3f,
                 baseValue = 3f,
+                valueScale = 1.5f,
                 scalingType = ScalingType.ADDITIVE,
                 increment = 1f
             )
@@ -64,51 +71,55 @@ class UpgradeManager {
                 name = "Coin Spawn Rate",
                 level = 1,
                 maxLevel = 10,
-                cost = 120,
-                baseCost = 120,
-                baseValue = 2f,
-                scalingType = ScalingType.MULTIPLICATIVE,
-                valueScale = 1.1f,
-                increment = 0f
+                currentCost = 300,
+                baseCost = 300,
+                costScale = 1.5f,
+                baseValue = 1f,
+                valueScale = 1.8f,
+                scalingType = ScalingType.ADDITIVE,
+                increment = 1f
             )
         )
         upgrades.add(
             Upgrade(
                 name = "Ruby Rate",
                 level = 1,
-                maxLevel = 50,
-                cost = 180,
+                maxLevel = 25,
+                currentCost = 180,
                 baseCost = 180,
-                baseValue = 15f,
-                scalingType = ScalingType.MULTIPLICATIVE,
-                valueScale = 1.1f,
-                increment = 0f
+                costScale = 1.2f,
+                baseValue = 1f,
+                valueScale = 1.5f,
+                scalingType = ScalingType.ADDITIVE,
+                increment = 1f
             )
         )
         upgrades.add(
             Upgrade(
                 name = "Sapphire Rate",
                 level = 1,
-                maxLevel = 25,
-                cost = 180,
+                maxLevel = 15,
+                currentCost = 180,
                 baseCost = 180,
-                baseValue = 15f,
-                scalingType = ScalingType.MULTIPLICATIVE,
-                valueScale = 1.1f,
-                increment = 0f
+                costScale = 1.2f,
+                baseValue = 1f,
+                valueScale = 1.5f,
+                scalingType = ScalingType.ADDITIVE,
+                increment = 1f
             )
         )
         upgrades.add(
             Upgrade(
                 name = "EXP Boost",
                 level = 1,
-                maxLevel = 5,
-                cost = 200,
+                maxLevel = 6,
+                currentCost = 200,
                 baseCost = 200,
+                costScale = 1.5f,
                 baseValue = 1f,
-                scalingType = ScalingType.MULTIPLICATIVE,
-                valueScale = 1.5f,
-                increment = 0f
+                valueScale = 1.25f,
+                scalingType = ScalingType.ADDITIVE,
+                increment = 0.2f
             )
         )
     }
@@ -133,7 +144,7 @@ class UpgradeManager {
             upgrade.level = 1
             upgrade.refreshValue()
         }
-        saveUpgrades()  // Save the reset state immediately
+        saveUpgrades()
     }
 
     fun levelUpUpgrade(name: String) {

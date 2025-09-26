@@ -23,6 +23,7 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
     private var selectedUpgrade: Upgrade? = null
     private lateinit var upgradeRectsMap: Map<String, UpgradeRects>
 
+
     private val upgradeManager = UpgradeManager()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
@@ -137,22 +138,22 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
                 batch.begin()
             }
 
-            val levelText = upgrade.level.toString()
+            val levelText = when {
+                upgrade.level >= upgrade.maxLevel -> "MAX"
+                else -> upgrade.level.toString()
+            }
             val levelLayout = GlyphLayout(font, levelText)
             val levelX = rects.lvlRect.x + (rects.lvlRect.width - levelLayout.width) / 2
             val levelY = rects.lvlRect.y + (rects.lvlRect.height + levelLayout.height) / 2
             font.draw(batch, levelLayout, levelX, levelY)
 
-            val valueText = if (upgrade.level >= upgrade.maxLevel) {
-                "MAX"
-            } else {
-                when (upgrade.name) {
-                    "Attack Speed" -> String.format("%.2f ms", upgrade.currentValue)
-                    "EXP Boost" -> String.format("%.1fx", upgrade.currentValue)
-                    "Ruby Rate" -> String.format("%.0f%%", upgrade.currentValue)
-                    "Sapphire Rate" -> String.format("%.0f%%", upgrade.currentValue)
-                    else -> upgrade.currentValue.toInt().toString()
-                }
+            val valueText = when (upgrade.name) {
+                "Attack Speed" -> String.format("%.2f ms", upgrade.currentValue)
+                "EXP Boost" -> String.format("%.1fx", upgrade.currentValue)
+                "Ruby Rate" -> String.format("%.0f%%", upgrade.currentValue)
+                "Sapphire Rate" -> String.format("%.0f%%", upgrade.currentValue)
+                "Coin Spawn Rate" -> String.format("%.0fx", upgrade.currentValue)
+                else -> upgrade.currentValue.toInt().toString()
             }
             val valueLayout = GlyphLayout(font, valueText)
             val valueX = rects.currentRect.x + (rects.currentRect.width - valueLayout.width) / 2
@@ -163,13 +164,15 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
         // Draw cost text with color indicating affordability
         selectedUpgrade?.let { sel ->
             val canUpgrade = sel.canUpgrade()
+            val dynamicCost = sel.getCurrentCost(sel.baseCost, sel.level, sel.costScale)
+
             font.color = when {
                 !canUpgrade -> Color.GRAY
-                game.collectedCoins >= sel.cost -> Color.GREEN
+                game.collectedCoins >= dynamicCost -> Color.GREEN
                 else -> Color.RED
             }
 
-            val costText = if (sel.canUpgrade()) sel.cost.toString() else "-"
+            val costText = if (canUpgrade) dynamicCost.toString() else "-"
             val costLayout = GlyphLayout(font, costText)
             val costX = costBarRect.x + (costBarRect.width - costLayout.width) / 2
             val costY = costBarRect.y + (costBarRect.height + costLayout.height) / 2
@@ -177,6 +180,8 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
 
             font.color = Color.BLACK // Reset after cost text
         }
+        font.color = Color.GOLD
+        font.draw(batch, "Coin Count: ${game.collectedCoins}",  930f, 85f)
         batch.end()
         handleInput()
     }
@@ -192,8 +197,8 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
                 }
                 upgradeButtonRect.contains(touchX, touchY) -> {
                     selectedUpgrade?.let { sel ->
-                        if (game.collectedCoins >= sel.cost && sel.canUpgrade()) {
-                            game.spendCoins(sel.cost)
+                        if (game.collectedCoins >= sel.currentCost && sel.canUpgrade()) {
+                            game.spendCoins(sel.currentCost )
                             upgradeManager.levelUpUpgrade(sel.name)
                             upgradeManager.saveUpgrades()
                             selectedUpgrade = upgradeManager.getAllUpgrades().firstOrNull { it.name == sel.name }

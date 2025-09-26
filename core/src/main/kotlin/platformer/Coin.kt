@@ -11,4 +11,8 @@ data class Coin(
     var y: Float,
     val type: CoinType,
     var stateTime: Float = 0f  // for animation timing
-)
+){
+    val value: Int
+        get() = type.value
+}
+

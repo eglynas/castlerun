@@ -35,7 +35,6 @@ class Player(
         get() = Rectangle(x, y, width, height)
 
     fun update(delta: Float, isJumpPressed: Boolean, isDownPressed: Boolean, moveDirection: Int) {
-        println("[Player] attackTimer=$attackTimer, isAttacking=$isAttacking")
         val onGround = y <= groundY + 0.1f
         if (onGround) jumpsDone = 0
 
@@ -76,7 +75,6 @@ class Player(
                 attackTimer = 0f
                 isAttacking = false
             }
-            println("[Player] attackTimer=$attackTimer, isAttacking=$isAttacking")
         }
     }
 
@@ -112,6 +110,5 @@ class Player(
         jumpsDone = 0
         isAttacking = false
         attackTimer = 0f
-        println("[Reset] Player state reset: attackTimer=$attackTimer, isAttacking=$isAttacking")
     }
 }
