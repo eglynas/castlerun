@@ -34,6 +34,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private val heartManager = HeartManager()
     private val platformManager = PlatformManager()
     private val powerUpManager = PowerUpManager()
+    private val rockManager = RockManager()
 
     private var worldLeftEdge = 0f
     private var gameOverFlag = false
@@ -112,9 +113,11 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             onPlayerHit()
         }
 
-        batManager.update(delta, worldLeftEdge, player.x, camera, playerBounds) {
+        batManager.update(delta, worldLeftEdge, player.x, camera, playerBounds, {
             onPlayerHit()
-        }
+        }, rockManager)
+
+        rockManager.update(delta, worldLeftEdge, playerBounds) { damage -> onPlayerHit() }
 
         fireSlashManager.updateWithManagers(
             delta, camera,
@@ -199,6 +202,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         // Draw all entities using managers
         skeletonManager.draw(batch)
         batManager.draw(batch)
+        rockManager.draw(batch)
         coinManager.draw(batch)
         platformManager.draw(batch)
         fireSlashManager.draw(batch)

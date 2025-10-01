@@ -12,30 +12,41 @@ class BatManager : EntityManager<Bat>() {
     var batSpawnChance = 50.0
 
     fun update(delta: Float, worldLeftEdge: Float, playerX: Float, camera: OrthographicCamera,
-               playerBounds: Rectangle, onPlayerHit: () -> Unit) {
+               playerBounds: Rectangle, onPlayerHit: () -> Unit, rockManager: RockManager) {
         // Handle spawning
         if (playerX > nextBatSpawnX) {
             spawnBat(camera)
         }
 
-        // Remove off-screen Bats
+        // Remove off-screen bats
         removeAll { bat -> bat.x < worldLeftEdge - 500f }
 
         // Update existing bats
         getAll().forEach { bat ->
             bat.updateBlink(delta)
+            bat.updateAttackTimer(delta)
             bat.x += bat.vx * delta
 
-            // Check collision with player
+            // Check if player is horizontally aligned (within attack range on X-axis)
+            val horizontalDistance = kotlin.math.abs(bat.x - playerX)
+            val isPlayerBelow = playerBounds.y < bat.y
+            val isHorizontallyAligned = horizontalDistance <= 50f // Adjust range as needed
+
+            bat.hasLineOfSight = isPlayerBelow && isHorizontallyAligned
+
+            // Attack logic: drop rock if conditions are met
+            if (bat.hasLineOfSight && bat.canAttack()) {
+                rockManager.dropRock(bat.x, bat.y - 20f, damage = 1) // Drop from bat position
+                bat.resetAttackCooldown()
+            }
+
+            // Check collision with player (direct contact)
             if (playerBounds.overlaps(getBounds(bat))) {
                 onPlayerHit()
             }
         }
     }
 
-    /**
-     * Get the bounding rectangle for a Bat based on its type
-     */
     fun getBounds(bat: Bat): Rectangle {
         val texture = when (bat.type) {
             BatType.BLACK -> AssetsManager.bat_black

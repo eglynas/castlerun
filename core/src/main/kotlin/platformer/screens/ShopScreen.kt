@@ -98,7 +98,7 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
             upgradeManager.loadUpgrades()
         }
         selectedUpgrade = null  // Start with no upgrade selected
-        //upgradeManager.resetUpgradesToLevelOne()
+        upgradeManager.resetUpgradesToLevelOne()
     }
 
     fun drawThickRectangleOutline(
