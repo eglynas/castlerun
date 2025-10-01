@@ -1,4 +1,4 @@
-package platformer
+package platformer.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import platformer.PlatformerGame
+import platformer.managers.AssetsManager
 import kotlin.math.min
 
 class MainMenuScreen(private val game: PlatformerGame) : Screen {
@@ -31,7 +33,7 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
     private lateinit var closeGameButtonRect: Rectangle
 
     override fun show() {
-        Assets.loadAll()
+        AssetsManager.loadAll()
         resize(Gdx.graphics.width, Gdx.graphics.height)
     }
 
@@ -40,7 +42,7 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         batch.begin()
-        batch.draw(Assets.mainMenu, menuX, menuY, menuDrawWidth, menuDrawHeight)
+        batch.draw(AssetsManager.mainMenu, menuX, menuY, menuDrawWidth, menuDrawHeight)
         // Draw coin count at desired screen location (for example, top left)
         font.color = Color.GOLD // Optional: change color
         font.data.setScale(2f) // Optional: make the text larger
@@ -140,7 +142,7 @@ class MainMenuScreen(private val game: PlatformerGame) : Screen {
                     game.setScreen(ShopScreen(game))
                 }
                 closeGameButtonRect.contains(mouseX, mouseY) -> {
-                    Assets.disposeAll()
+                    AssetsManager.disposeAll()
                     Gdx.app.exit()
                 }
             }

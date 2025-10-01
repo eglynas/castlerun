@@ -1,4 +1,4 @@
-package platformer
+package platformer.entities
 
 data class FireSlash(
     var x: Float,

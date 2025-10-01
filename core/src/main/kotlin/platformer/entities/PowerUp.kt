@@ -1,4 +1,4 @@
-package platformer
+package platformer.entities
 
 class PowerUpPickup(
     var x: Float,

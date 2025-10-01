@@ -1,4 +1,4 @@
-package platformer
+package platformer.entities
 
 enum class SkeletonType(val value: Int) {
     STANDARD(0),

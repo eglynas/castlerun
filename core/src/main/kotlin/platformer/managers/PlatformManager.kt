@@ -3,6 +3,8 @@ package platformer.managers
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import platformer.*
+import platformer.entities.Platform
+import platformer.entities.PlatformPatterns
 
 class PlatformManager : EntityManager<Platform>() {
     private var nextChunkSpawnX = 0f
@@ -34,7 +36,7 @@ class PlatformManager : EntityManager<Platform>() {
         val groundY = 100f
 
         for (plat in chunk) {
-            val platY = maxOf(plat.y, groundY + Assets.platform.height + 50f)
+            val platY = maxOf(plat.y, groundY + AssetsManager.platform.height + 50f)
             add(Platform(chunkOffsetX + plat.x, platY, plat.width, plat.height))
         }
         nextChunkSpawnX = chunkOffsetX + chunk.maxOf { it.x + it.width }
@@ -43,7 +45,7 @@ class PlatformManager : EntityManager<Platform>() {
 
     fun draw(batch: SpriteBatch) {
         getAll().forEach { platform ->
-            batch.draw(Assets.platform, platform.x, platform.y)
+            batch.draw(AssetsManager.platform, platform.x, platform.y)
         }
     }
 }

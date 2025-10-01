@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import kotlin.random.Random
-import platformer.*
+import platformer.entities.Coin
+import platformer.entities.CoinType
 
 class CoinManager : EntityManager<Coin>() {
     private var coinSpawnInterval = 2.0f
@@ -27,9 +28,9 @@ class CoinManager : EntityManager<Coin>() {
         val coinsToRemove = mutableListOf<Coin>()
         getAll().forEach { coin ->
             val animation = when (coin.type) {
-                CoinType.GOLD -> Assets.goldCoinAnimation
-                CoinType.RUBY -> Assets.rubyCoinAnimation
-                CoinType.SAPPHIRE -> Assets.sapphireCoinAnimation
+                CoinType.GOLD -> AssetsManager.goldCoinAnimation
+                CoinType.RUBY -> AssetsManager.rubyCoinAnimation
+                CoinType.SAPPHIRE -> AssetsManager.sapphireCoinAnimation
             }
             val frame = animation.getKeyFrame(coin.stateTime, true)
             val coinBounds = Rectangle(coin.x, coin.y, frame.regionWidth.toFloat(), frame.regionHeight.toFloat())
@@ -61,9 +62,9 @@ class CoinManager : EntityManager<Coin>() {
     fun draw(batch: SpriteBatch) {
         getAll().forEach { coin ->
             val animation = when (coin.type) {
-                CoinType.GOLD -> Assets.goldCoinAnimation
-                CoinType.RUBY -> Assets.rubyCoinAnimation
-                CoinType.SAPPHIRE -> Assets.sapphireCoinAnimation
+                CoinType.GOLD -> AssetsManager.goldCoinAnimation
+                CoinType.RUBY -> AssetsManager.rubyCoinAnimation
+                CoinType.SAPPHIRE -> AssetsManager.sapphireCoinAnimation
             }
             val frame = animation.getKeyFrame(coin.stateTime, true)
             batch.draw(frame, coin.x, coin.y)

@@ -1,4 +1,4 @@
-package platformer
+package platformer.entities
 
 data class Platform(
     var x: Float,
@@ -6,3 +6,4 @@ data class Platform(
     val width: Float,
     val height: Float
 )
+

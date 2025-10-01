@@ -1,4 +1,4 @@
-package platformer
+package platformer.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
+import platformer.PlatformerGame
 
 class GameOverScreen(private val game: PlatformerGame) : Screen {
 

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import kotlin.random.Random
-import platformer.*
+import platformer.entities.Heart
 
 class HeartManager : EntityManager<Heart>() {
     private var nextHeartSpawnX = 1500f
@@ -24,7 +24,7 @@ class HeartManager : EntityManager<Heart>() {
         val iterator = getAll().iterator()
         while (iterator.hasNext()) {
             val heart = iterator.next()
-            val heartBounds = Rectangle(heart.x, heart.y, Assets.heart.width.toFloat(), Assets.heart.height.toFloat())
+            val heartBounds = Rectangle(heart.x, heart.y, AssetsManager.heart.width.toFloat(), AssetsManager.heart.height.toFloat())
             if (playerBounds.overlaps(heartBounds)) {
                 onHeartCollected()
                 remove(heart)
@@ -42,7 +42,7 @@ class HeartManager : EntityManager<Heart>() {
 
     fun draw(batch: SpriteBatch) {
         getAll().forEach { heart ->
-            batch.draw(Assets.heart, heart.x, heart.y)
+            batch.draw(AssetsManager.heart, heart.x, heart.y)
         }
     }
 

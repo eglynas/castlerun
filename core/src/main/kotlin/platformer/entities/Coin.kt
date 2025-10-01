@@ -1,4 +1,4 @@
-package platformer
+package platformer.entities
 
 enum class CoinType(val value: Int) {
     GOLD(1),

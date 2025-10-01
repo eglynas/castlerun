@@ -1,4 +1,4 @@
-package platformer
+package platformer.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -7,7 +7,15 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.ScreenUtils
+import platformer.screens.GameOverScreen
+import platformer.PlatformerGame
+import platformer.Player
+import platformer.managers.UpgradeManager
+import platformer.entities.Platform
+import platformer.entities.PowerUpEffect
+import platformer.entities.PowerUpType
 import platformer.managers.*
 
 class GameplayScreen(private val game: PlatformerGame) : Screen {
@@ -137,18 +145,18 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         batch.begin()
 
         // Draw background
-        val bgWidth = Assets.bg.width.toFloat()
+        val bgWidth = AssetsManager.bg.width.toFloat()
         val halfViewportWidth = camera.viewportWidth / 2f
         val viewportLeft = camera.position.x - halfViewportWidth
         val viewportRight = camera.position.x + halfViewportWidth
         var startX = (viewportLeft / bgWidth).toInt() * bgWidth
         while (startX < viewportRight) {
-            batch.draw(Assets.bg, startX, 0f, bgWidth, Gdx.graphics.height.toFloat())
+            batch.draw(AssetsManager.bg, startX, 0f, bgWidth, Gdx.graphics.height.toFloat())
             startX += bgWidth
         }
 
         // Draw player
-        val currentPlayerTexture = if (player.isAttacking) Assets.playerAttack else Assets.player
+        val currentPlayerTexture = if (player.isAttacking) AssetsManager.playerAttack else AssetsManager.player
         if (player.isInvincible) {
             batch.setColor(1f, 1f, 1f, if (player.isVisible) 1f else 0.3f)
         } else {
@@ -166,15 +174,15 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         powerUpManager.draw(batch)
 
         // Draw player health
-        val heartW = Assets.heart.width.toFloat()
-        val heartH = Assets.heart.height.toFloat()
+        val heartW = AssetsManager.heart.width.toFloat()
+        val heartH = AssetsManager.heart.height.toFloat()
         val spacing = 12f
         val paddingTop = 20f
         val paddingLeft = 20f
         for (i in 0 until player.health) {
             val x = camera.position.x - camera.viewportWidth / 2f + paddingLeft + i * (heartW + spacing)
             val y = camera.position.y + camera.viewportHeight / 2f - paddingTop - heartH
-            batch.draw(Assets.heart, x, y)
+            batch.draw(AssetsManager.heart, x, y)
         }
 
         batch.end()
@@ -182,17 +190,17 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
 
     private fun drawPauseScreen() {
         batch.begin()
-        Assets.font.color = Color.WHITE
+        AssetsManager.font.color = Color.WHITE
         val text = "PAUSED\nPress Q to quit to menu\nPress P to resume"
-        val layout = GlyphLayout(Assets.font, text)
-        Assets.font.draw(batch, text, camera.position.x - layout.width / 2, camera.position.y + layout.height / 2)
+        val layout = GlyphLayout(AssetsManager.font, text)
+        AssetsManager.font.draw(batch, text, camera.position.x - layout.width / 2, camera.position.y + layout.height / 2)
         batch.end()
     }
 
     private fun handlePlatformCollision() {
         // Platform collision logic remains the same
         val footHeight = 10f
-        val footRect = com.badlogic.gdx.math.Rectangle(player.x, player.y, player.width, footHeight)
+        val footRect = Rectangle(player.x, player.y, player.width, footHeight)
         var standingOnPlatform: Platform? = null
 
         for (platform in platformManager.getAll()) {

@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import kotlin.random.Random
-import platformer.*
+import platformer.entities.PowerUpEffect
+import platformer.entities.PowerUpPickup
+import platformer.entities.PowerUpType
 
 class PowerUpManager : EntityManager<PowerUpPickup>() {
     private val activePowerUps = mutableListOf<PowerUpEffect>()
@@ -34,10 +36,10 @@ class PowerUpManager : EntityManager<PowerUpPickup>() {
         while (iterator.hasNext()) {
             val pickup = iterator.next()
             val width = when (pickup.type) {
-                PowerUpType.COIN_SPAWN_RATE_BOOST -> Assets.coin_bonus.width.toFloat()
+                PowerUpType.COIN_SPAWN_RATE_BOOST -> AssetsManager.coin_bonus.width.toFloat()
             }
             val height = when (pickup.type) {
-                PowerUpType.COIN_SPAWN_RATE_BOOST -> Assets.coin_bonus.height.toFloat()
+                PowerUpType.COIN_SPAWN_RATE_BOOST -> AssetsManager.coin_bonus.height.toFloat()
             }
             val pickupBounds = Rectangle(pickup.x, pickup.y, width, height)
 
@@ -64,7 +66,7 @@ class PowerUpManager : EntityManager<PowerUpPickup>() {
     fun draw(batch: SpriteBatch) {
         getAll().forEach { pickup ->
             val texture = when (pickup.type) {
-                PowerUpType.COIN_SPAWN_RATE_BOOST -> Assets.coin_bonus
+                PowerUpType.COIN_SPAWN_RATE_BOOST -> AssetsManager.coin_bonus
             }
             batch.draw(texture, pickup.x, pickup.y)
         }

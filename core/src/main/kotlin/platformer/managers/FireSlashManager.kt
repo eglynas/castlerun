@@ -3,7 +3,9 @@ package platformer.managers
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
-import platformer.*
+import platformer.entities.FireSlash
+import platformer.entities.Skeleton
+import platformer.entities.SkeletonType
 
 class FireSlashManager : EntityManager<FireSlash>() {
 
@@ -13,14 +15,14 @@ class FireSlashManager : EntityManager<FireSlash>() {
         while (iterator.hasNext()) {
             val slash = iterator.next()
             slash.x += slash.vx * delta
-            val slashBounds = Rectangle(slash.x, slash.y, Assets.fireSlash.width.toFloat(), Assets.fireSlash.height.toFloat())
+            val slashBounds = Rectangle(slash.x, slash.y, AssetsManager.fireSlash.width.toFloat(), AssetsManager.fireSlash.height.toFloat())
 
             // Check collision with skeletons
             val hitSkeleton = skeletons.firstOrNull { skeleton ->
                 val textureRef = when (skeleton.type) {
-                    SkeletonType.STANDARD -> Assets.skeleton
-                    SkeletonType.LIGHT -> Assets.skeletonLight
-                    SkeletonType.GRAY -> Assets.skeletonGray
+                    SkeletonType.STANDARD -> AssetsManager.skeleton
+                    SkeletonType.LIGHT -> AssetsManager.skeletonLight
+                    SkeletonType.GRAY -> AssetsManager.skeletonGray
                 }
                 val skeletonBounds = Rectangle(skeleton.x, skeleton.y, textureRef.width.toFloat(), textureRef.height.toFloat())
                 slashBounds.overlaps(skeletonBounds)
@@ -42,7 +44,7 @@ class FireSlashManager : EntityManager<FireSlash>() {
 
     fun draw(batch: SpriteBatch) {
         getAll().forEach { slash ->
-            batch.draw(Assets.fireSlash, slash.x, slash.y)
+            batch.draw(AssetsManager.fireSlash, slash.x, slash.y)
         }
     }
 

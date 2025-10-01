@@ -1,6 +1,9 @@
-package platformer
+package platformer.managers
+
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Preferences
+import platformer.ScalingType
+import platformer.Upgrade
 
 class UpgradeManager {
 
@@ -155,6 +158,3 @@ class UpgradeManager {
 
     fun hasSavedUpgrades(): Boolean = prefs.contains("upgrade_level_Jump Count")
 }
-
-
-

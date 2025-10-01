@@ -1,12 +1,12 @@
-package platformer
+package platformer.managers
 
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 
-object Assets {
+object AssetsManager {
     val manager = AssetManager()
 
     // Texture paths (adjust as needed, ensure files exist in your assets directory)

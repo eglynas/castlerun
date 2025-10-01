@@ -1,4 +1,4 @@
-package platformer
+package platformer.screens
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.Gdx
@@ -10,6 +10,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.ScreenUtils
+import platformer.PlatformerGame
+import platformer.Upgrade
+import platformer.managers.UpgradeManager
+import platformer.managers.AssetsManager
 import kotlin.math.min
 
 class ShopScreen(private val game: PlatformerGame) : Screen {
@@ -114,7 +118,7 @@ class ShopScreen(private val game: PlatformerGame) : Screen {
         ScreenUtils.clear(0f, 0f, 0f, 1f)
         batch.projectionMatrix = camera.combined
         batch.begin()
-        batch.draw(Assets.shop, shopX, shopY, shopDrawSize, shopDrawSize)
+        batch.draw(AssetsManager.shop, shopX, shopY, shopDrawSize, shopDrawSize)
         font.color = Color.BLACK
 
         val upgrades = upgradeManager.getAllUpgrades()

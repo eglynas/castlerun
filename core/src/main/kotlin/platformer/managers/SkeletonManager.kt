@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import kotlin.random.Random
-import platformer.*
+import platformer.entities.Skeleton
+import platformer.entities.SkeletonType
 
 class SkeletonManager : EntityManager<Skeleton>() {
     private var nextSkeletonSpawnX = 400f
@@ -27,9 +28,9 @@ class SkeletonManager : EntityManager<Skeleton>() {
 
             // Check collision with player
             val texture = when (skeleton.type) {
-                SkeletonType.STANDARD -> Assets.skeleton
-                SkeletonType.LIGHT -> Assets.skeletonLight
-                SkeletonType.GRAY -> Assets.skeletonGray
+                SkeletonType.STANDARD -> AssetsManager.skeleton
+                SkeletonType.LIGHT -> AssetsManager.skeletonLight
+                SkeletonType.GRAY -> AssetsManager.skeletonGray
             }
             val skeletonBounds = Rectangle(skeleton.x, skeleton.y, texture.width.toFloat(), texture.height.toFloat())
             if (playerBounds.overlaps(skeletonBounds)) {
@@ -47,14 +48,16 @@ class SkeletonManager : EntityManager<Skeleton>() {
                 SkeletonType.LIGHT -> 2
                 SkeletonType.GRAY -> 4
             }
-            add(Skeleton(
-                x = spawnX,
-                y = 100f, // groundY
-                vx = -60f,
-                isLight = type == SkeletonType.LIGHT,
-                type = type,
-                health = health
-            ))
+            add(
+                Skeleton(
+                    x = spawnX,
+                    y = 100f, // groundY
+                    vx = -60f,
+                    isLight = type == SkeletonType.LIGHT,
+                    type = type,
+                    health = health
+                )
+            )
         }
         nextSkeletonSpawnX += (Random.nextDouble() * 500.0 + 300.0).toFloat()
     }
@@ -62,9 +65,9 @@ class SkeletonManager : EntityManager<Skeleton>() {
     fun draw(batch: SpriteBatch) {
         getAll().forEach { skeleton ->
             val texture = when (skeleton.type) {
-                SkeletonType.STANDARD -> Assets.skeleton
-                SkeletonType.LIGHT -> Assets.skeletonLight
-                SkeletonType.GRAY -> Assets.skeletonGray
+                SkeletonType.STANDARD -> AssetsManager.skeleton
+                SkeletonType.LIGHT -> AssetsManager.skeletonLight
+                SkeletonType.GRAY -> AssetsManager.skeletonGray
             }
             batch.setColor(1f, 1f, 1f, if (skeleton.isBlinking) 0.3f else 1f)
             batch.draw(texture, skeleton.x, skeleton.y)

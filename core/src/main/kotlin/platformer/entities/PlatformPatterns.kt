@@ -1,4 +1,4 @@
-package platformer
+package platformer.entities
 
 const val WIDTH = 120f
 const val HEIGHT = 16f
