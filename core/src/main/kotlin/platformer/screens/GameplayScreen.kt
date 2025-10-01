@@ -9,13 +9,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.ScreenUtils
-import platformer.screens.GameOverScreen
 import platformer.PlatformerGame
 import platformer.Player
 import platformer.managers.UpgradeManager
-import platformer.entities.Platform
-import platformer.entities.PowerUpEffect
-import platformer.entities.PowerUpType
+import platformer.entities.*
 import platformer.managers.*
 
 class GameplayScreen(private val game: PlatformerGame) : Screen {
@@ -32,6 +29,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     // Entity managers
     private val fireSlashManager = FireSlashManager()
     private val skeletonManager = SkeletonManager()
+    private val batManager = BatManager()
     private val coinManager = CoinManager()
     private val heartManager = HeartManager()
     private val platformManager = PlatformManager()
@@ -114,13 +112,46 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             onPlayerHit()
         }
 
-        fireSlashManager.update(delta, camera, skeletonManager.getAll()) { skeleton, damage ->
-            val isDead = skeletonManager.handleSkeletonHit(skeleton, damage)
-            if (isDead) {
-                game.addXP((10 * expGainMultiplier).toInt())
-                game.saveGlobals()
-            }
+        batManager.update(delta, worldLeftEdge, player.x, camera, playerBounds) {
+            onPlayerHit()
         }
+
+        fireSlashManager.updateWithManagers(
+            delta, camera,
+            managers = listOf(skeletonManager, batManager), // Add bat manager when you create it
+            getTargetsFromManager = { manager ->
+                when (manager) {
+                    is SkeletonManager -> manager.getAll()
+                    is BatManager -> manager.getAll() // When you create BatManager
+                    else -> emptyList()
+                }
+            },
+            getBoundsFromManager = { manager, target ->
+                when (manager) {
+                    is SkeletonManager -> manager.getBounds(target as Skeleton)
+                    is BatManager -> manager.getBounds(target as Bat) // When you create BatManager
+                    else -> Rectangle(0f, 0f, 0f, 0f)
+                }
+            },
+            onManagerHit = { manager, target, damage ->
+                when (manager) {
+                    is SkeletonManager -> {
+                        val isDead = manager.handleSkeletonHit(target as Skeleton, damage)
+                        if (isDead) {
+                            game.addXP((10 * expGainMultiplier).toInt())
+                            game.saveGlobals()
+                        }
+                    }
+                    is BatManager -> {
+                        val isDead = manager.handleBatHit(target as Bat, damage) // When you create BatManager
+                        if (isDead) {
+                            game.addXP((5 * expGainMultiplier).toInt()) // Different XP for bats
+                            game.saveGlobals()
+                        }
+                    }
+                }
+            }
+        )
 
         coinManager.update(delta, worldLeftEdge, playerBounds, camera) { coinValue ->
             game.addCoins(coinValue)
@@ -167,6 +198,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
 
         // Draw all entities using managers
         skeletonManager.draw(batch)
+        batManager.draw(batch)
         coinManager.draw(batch)
         platformManager.draw(batch)
         fireSlashManager.draw(batch)
@@ -262,7 +294,6 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private fun onPlayerHit() {
         player.onHit()
         if (!player.isAlive()) {
-            println("GAME OVER!")
             gameOverFlag = true
         }
     }
@@ -309,6 +340,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
         player.reset(100f, groundY, 3)
         worldLeftEdge = 0f
         skeletonManager.reset()
+        batManager.reset()
         fireSlashManager.clear()
         gameOverFlag = false
     }

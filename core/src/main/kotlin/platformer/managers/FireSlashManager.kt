@@ -4,42 +4,53 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import platformer.entities.FireSlash
-import platformer.entities.Skeleton
-import platformer.entities.SkeletonType
 
 class FireSlashManager : EntityManager<FireSlash>() {
 
-    fun update(delta: Float, camera: OrthographicCamera, skeletons: List<Skeleton>,
-               onSkeletonHit: (Skeleton, Int) -> Unit) {
-        val iterator = getAll().iterator()
-        while (iterator.hasNext()) {
-            val slash = iterator.next()
+    fun <M> updateWithManagers(
+        delta: Float,
+        camera: OrthographicCamera,
+        managers: List<M>,
+        getTargetsFromManager: (M) -> List<Any>,
+        getBoundsFromManager: (M, Any) -> Rectangle,
+        onManagerHit: (manager: M, target: Any, damage: Int) -> Unit
+    ) {
+        val slashesToRemove = mutableListOf<FireSlash>()
+
+        getAll().forEach { slash ->
             slash.x += slash.vx * delta
-            val slashBounds = Rectangle(slash.x, slash.y, AssetsManager.fireSlash.width.toFloat(), AssetsManager.fireSlash.height.toFloat())
+            val slashBounds = Rectangle(
+                slash.x, slash.y,
+                AssetsManager.fireSlash.width.toFloat(), AssetsManager.fireSlash.height.toFloat()
+            )
 
-            // Check collision with skeletons
-            val hitSkeleton = skeletons.firstOrNull { skeleton ->
-                val textureRef = when (skeleton.type) {
-                    SkeletonType.STANDARD -> AssetsManager.skeleton
-                    SkeletonType.LIGHT -> AssetsManager.skeletonLight
-                    SkeletonType.GRAY -> AssetsManager.skeletonGray
+            var hitDetected = false
+
+            // Check collision with all managers' targets
+            for (manager in managers) {
+                if (hitDetected) break
+
+                val targets = getTargetsFromManager(manager)
+                val hitTarget = targets.firstOrNull { target ->
+                    slashBounds.overlaps(getBoundsFromManager(manager, target))
                 }
-                val skeletonBounds = Rectangle(skeleton.x, skeleton.y, textureRef.width.toFloat(), textureRef.height.toFloat())
-                slashBounds.overlaps(skeletonBounds)
+
+                if (hitTarget != null) {
+                    val damage = slash.damage.takeIf { it > 0 } ?: 1
+                    onManagerHit(manager, hitTarget, damage)
+                    slashesToRemove.add(slash)
+                    hitDetected = true
+                }
             }
 
-            if (hitSkeleton != null) {
-                val damage = slash.damage.takeIf { it > 0 } ?: 1
-                onSkeletonHit(hitSkeleton, damage)
-                remove(slash)
-                continue
-            }
-
-            // Remove if off screen
-            if (slash.x > camera.position.x + camera.viewportWidth / 2f + 100f) {
-                remove(slash)
+            // Remove if
+            if (!hitDetected && slash.x > camera.position.x + camera.viewportWidth / 2f + 100f) {
+                slashesToRemove.add(slash)
             }
         }
+
+        // Remove slashes safely
+        slashesToRemove.forEach { slash -> remove(slash) }
     }
 
     fun draw(batch: SpriteBatch) {

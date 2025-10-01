@@ -16,6 +16,8 @@ object AssetsManager {
     private const val SKELETON = "skeleton.png"
     private const val SKELETON_LIGHT = "skeleton_light.png"
     private const val SKELETON_GRAY = "skeleton_gray.png"
+    private const val BAT_BLACK = "bat_black.png"
+    private const val BAT_BROWN = "bat_brown.png"
     private const val FIRE_SLASH = "fire_slash.png"
     private const val HEART = "heart.png"
     private const val GOLD_COIN = "gold_coin.png"
@@ -25,6 +27,7 @@ object AssetsManager {
     private const val MAIN_MENU = "main_menu.png"
     private const val SHOP = "shop.png"
     private const val COIN_BONUS = "coin_bonus.png"
+
 
     var bg: Texture = Texture(BG)
     lateinit var player: Texture
@@ -41,6 +44,8 @@ object AssetsManager {
     lateinit var mainMenu: Texture
     lateinit var shop: Texture
     lateinit var coin_bonus: Texture
+    lateinit var bat_black: Texture
+    lateinit var bat_brown: Texture
 
     lateinit var font: BitmapFont
 
@@ -53,7 +58,7 @@ object AssetsManager {
         val textures = listOf(
             PLAYER, PLAYER_ATTACK, SKELETON, SKELETON_LIGHT, SKELETON_GRAY,
             FIRE_SLASH, HEART, GOLD_COIN, RUBY_COIN, SAPPHIRE_COIN, PLATFORM,
-            MAIN_MENU, SHOP, COIN_BONUS
+            MAIN_MENU, SHOP, COIN_BONUS, BAT_BLACK, BAT_BROWN
         )
         textures.forEach { manager.load(it, Texture::class.java) }
         manager.finishLoading()
@@ -64,6 +69,8 @@ object AssetsManager {
         skeleton = manager.get(SKELETON, Texture::class.java)
         skeletonLight = manager.get(SKELETON_LIGHT, Texture::class.java)
         skeletonGray = manager.get(SKELETON_GRAY, Texture::class.java)
+        bat_black = manager.get(BAT_BLACK, Texture::class.java)
+        bat_brown = manager.get(BAT_BROWN, Texture::class.java)
         fireSlash = manager.get(FIRE_SLASH, Texture::class.java)
         heart = manager.get(HEART, Texture::class.java)
         goldCoin = manager.get(GOLD_COIN, Texture::class.java)

@@ -27,16 +27,22 @@ class SkeletonManager : EntityManager<Skeleton>() {
             skeleton.x += skeleton.vx * delta
 
             // Check collision with player
-            val texture = when (skeleton.type) {
-                SkeletonType.STANDARD -> AssetsManager.skeleton
-                SkeletonType.LIGHT -> AssetsManager.skeletonLight
-                SkeletonType.GRAY -> AssetsManager.skeletonGray
-            }
-            val skeletonBounds = Rectangle(skeleton.x, skeleton.y, texture.width.toFloat(), texture.height.toFloat())
-            if (playerBounds.overlaps(skeletonBounds)) {
+            if (playerBounds.overlaps(getBounds(skeleton))) {
                 onPlayerHit()
             }
         }
+    }
+
+    /**
+     * Get the bounding rectangle for a skeleton based on its type
+     */
+    fun getBounds(skeleton: Skeleton): Rectangle {
+        val texture = when (skeleton.type) {
+            SkeletonType.STANDARD -> AssetsManager.skeleton
+            SkeletonType.LIGHT -> AssetsManager.skeletonLight
+            SkeletonType.GRAY -> AssetsManager.skeletonGray
+        }
+        return Rectangle(skeleton.x, skeleton.y, texture.width.toFloat(), texture.height.toFloat())
     }
 
     private fun spawnSkeleton(camera: OrthographicCamera) {
@@ -92,4 +98,3 @@ class SkeletonManager : EntityManager<Skeleton>() {
         nextSkeletonSpawnX = 400f
     }
 }
-
