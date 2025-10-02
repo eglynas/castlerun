@@ -1,12 +1,12 @@
 # Castlerun - a 2D Platformer made for fun on a journey to learn Kotlin
 <p align="center">
-  <a href="https://youtu.be/PUdvfj6G_-8">[Watch Gameplay]</a>
+  <a href="https://youtu.be/PUdvfj6G_-8">[>>Watch Gameplay on YouTube<<]</a>
 </p>
 <img width="1536" height="1024" alt="main_menu" src="https://github.com/user-attachments/assets/d01ed6ae-2cd6-46b2-9f94-9c69fb19f97c" />
 <img width="1024" height="1024" alt="shop" src="https://github.com/user-attachments/assets/449cc913-e580-44b4-a160-1700e04b9ed6" />
 <img width="1024" height="1024" alt="game_over" src="https://github.com/user-attachments/assets/24af1502-11f4-4d2e-a5f3-633ba1da9b42" />
 
-## ============================================================
+## =================================================
 
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
