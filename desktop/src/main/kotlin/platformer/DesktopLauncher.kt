@@ -7,7 +7,7 @@ fun main() {
     val displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode(monitor)
 
     val config = Lwjgl3ApplicationConfiguration().apply {
-        setTitle("Platformer Game")
+        setTitle("Castle Run")
         setWindowedMode(displayMode.width, displayMode.height - 100)
         setDecorated(true)
         setResizable(true)

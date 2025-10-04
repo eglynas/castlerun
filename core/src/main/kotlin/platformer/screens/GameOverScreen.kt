@@ -3,9 +3,12 @@ package platformer.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.Screen
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.utils.ScreenUtils
 import platformer.PlatformerGame
 
@@ -13,6 +16,7 @@ class GameOverScreen(private val game: PlatformerGame) : Screen {
 
     private val gameOverTexture = Texture("game_over.png")
     private val batch = SpriteBatch()
+    private val font = BitmapFont().apply { color = Color.WHITE }
     private val camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
     override fun show() {
@@ -23,7 +27,6 @@ class GameOverScreen(private val game: PlatformerGame) : Screen {
     override fun render(delta: Float) {
         ScreenUtils.clear(0f, 0f, 0f, 1f)
 
-        // Calculate draw size and position to center and scale texture to screen
         val screenW = Gdx.graphics.width.toFloat()
         val screenH = Gdx.graphics.height.toFloat()
         val texW = gameOverTexture.width.toFloat()
@@ -38,8 +41,24 @@ class GameOverScreen(private val game: PlatformerGame) : Screen {
         batch.projectionMatrix = camera.combined
         batch.begin()
         batch.draw(gameOverTexture, drawX, drawY, drawW, drawH)
-        batch.end()
 
+        val stats = game.statsManager
+        val lines = listOf(
+            "Session Kills: ${stats.sessionKills}",
+            "Coins Collected: ${stats.sessionCoinsEarned}",
+            "Session Time: ${stats.sessionPlaytime.toInt()}s"
+        )
+
+        val padding = 510f * scale              // scale padding with texture scale
+        var textY = drawY + drawH - padding    // start just below top of texture
+
+        for (line in lines) {
+            val layout = GlyphLayout(font, line)
+            val textX = drawX + (drawW - layout.width) / 2f
+            font.draw(batch, layout, textX, textY)
+            textY -= layout.height + 10f * scale
+        }
+        batch.end()
         handleInput()
     }
 

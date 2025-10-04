@@ -18,7 +18,7 @@ object AssetsManager {
     private const val SKELETON_GRAY = "skeleton_gray.png"
     private const val BAT_BLACK = "bat_black.png"
     private const val BAT_BROWN = "bat_brown.png"
-    private const val ROCK = "rocks.png"
+    private const val ROCK = "rock.png"
     private const val FIRE_SLASH = "fire_slash.png"
     private const val HEART = "heart.png"
     private const val GOLD_COIN = "gold_coin.png"

@@ -3,20 +3,22 @@ package platformer
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import platformer.screens.MainMenuScreen
+import platformer.managers.StatsManager
 
 class PlatformerGame : Game() {
-    var collectedCoins: Int = 1
+    // Current game resources (not statistics!)
+    var collectedCoins: Int = 1  // Current coins in wallet
+        private set
+    var xp: Int = 0             // Current XP level
         private set
 
-    var xp: Int = 0
-        private set
+    val statsManager = StatsManager()
 
     fun addCoins(amount: Int = 1) {
         collectedCoins += amount
+        statsManager.addCoins(amount)  // Track for stats
         saveGlobals()
     }
-
-    //fun getCollectedCoins(): Int = collectedCoins
 
     fun spendCoins(cost: Int) {
         collectedCoins -= cost
@@ -35,15 +37,17 @@ class PlatformerGame : Game() {
         collectedCoins = prefs.getInteger("coinCount", 0)
         xp = prefs.getInteger("xp", 0)
     }
+
     fun saveGlobals() {
         val prefs = Gdx.app.getPreferences("platformer_prefs")
         prefs.putInteger("coinCount", collectedCoins)
         prefs.putInteger("xp", xp)
         prefs.flush()
     }
+
     override fun create() {
-        // Start the game with the main menu screen
         loadGlobals()
+        statsManager.loadStats()       // Load stats separately
         setScreen(MainMenuScreen(this))
     }
 }

@@ -65,6 +65,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
             upgradeManager.loadUpgrades()
         }
 
+        game.statsManager.startNewSession()
         applyUpgradesToGame()
         resetGame()
     }
@@ -86,6 +87,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     }
 
     private fun updateGame(delta: Float) {
+        game.statsManager.addPlaytime(delta)
         // Player movement and update
         if (Gdx.input.isKeyPressed(Input.Keys.A)) player.x -= player.moveSpeed * delta
         if (Gdx.input.isKeyPressed(Input.Keys.D)) player.x += player.moveSpeed * delta
@@ -141,6 +143,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
                     is SkeletonManager -> {
                         val isDead = manager.handleSkeletonHit(target as Skeleton, damage)
                         if (isDead) {
+                            game.statsManager.addKill()
                             game.addXP((10 * expGainMultiplier).toInt())
                             game.saveGlobals()
                         }
@@ -148,6 +151,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
                     is BatManager -> {
                         val isDead = manager.handleBatHit(target as Bat, damage) // When you create BatManager
                         if (isDead) {
+                            game.statsManager.addKill()
                             game.addXP((5 * expGainMultiplier).toInt()) // Different XP for bats
                             game.saveGlobals()
                         }
@@ -298,6 +302,7 @@ class GameplayScreen(private val game: PlatformerGame) : Screen {
     private fun onPlayerHit() {
         player.onHit()
         if (!player.isAlive()) {
+            game.statsManager.addDeath()
             gameOverFlag = true
         }
     }
